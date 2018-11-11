@@ -1,0 +1,20 @@
+name: SleepMultiplier
+main: tld.sima.sleepmultiplier.Main
+version: 0.1
+api-version: 1.13
+author: Simon A
+description: A passive plugin that detects what proportion of the players are asleep, and either skips to the next day or multiply the speed of day change.
+softdepend: [Multiverse-Core]
+
+commands:
+  addworld:
+    description: Adds world to sleep multiplier
+    usage: /addworld <WorldName>
+    permission: SleepMultiplier.addworld
+    permission-message: You don't have the SleepMultiplier.addworld permission.
+  removeworld:
+    description: Removes world to sleep multiplier
+    usage: /removeworld <WorldName>
+    permission: SleepMultiplier.removeworld
+    permission-message: You don't have the SleepMultiplier.removeworld permission.
+  
