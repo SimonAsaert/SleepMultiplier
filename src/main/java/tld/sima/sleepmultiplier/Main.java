@@ -31,6 +31,7 @@ public class Main extends JavaPlugin implements Listener{
 		CommandManager cmgr = new CommandManager();
 		this.getCommand(cmgr.cmd1).setExecutor(cmgr);
 		this.getCommand(cmgr.cmd2).setExecutor(cmgr);
+		this.getCommand(cmgr.cmd3).setExecutor(cmgr);
 		
 		worldTimeSkip = new HashMap<UUID, WorldData>();
 		
@@ -66,6 +67,11 @@ public class Main extends JavaPlugin implements Listener{
 			public void run() {
 				for (UUID worlduuid : worlds) {
 					World world = Bukkit.getWorld(worlduuid);
+					long time = world.getTime();
+					if(time < 4500 || time > 20000) {
+						continue;
+					}
+
 					Set<UUID> sleepers = worldTimeSkip.get(world.getUID()).getSet();
 					if (!sleepers.isEmpty()) {
 						int hours = (int)(world.getTime()/1000);
@@ -83,11 +89,11 @@ public class Main extends JavaPlugin implements Listener{
 				}
 			}
 		}, 20, 2);
-		
 
 		getServer().getPluginManager().registerEvents(this, this);	
 		Bukkit.getServer().getConsoleSender().sendMessage(ChatColor.AQUA + "Sleep Multipler enabled");
 	}
+	
 	// Send display packet to player
 	private void sendTitle(UUID uuid, String title, String subtitle1, String subtitle2) {
 		Player player = Bukkit.getPlayer(uuid);
@@ -159,9 +165,18 @@ public class Main extends JavaPlugin implements Listener{
 	
 	@EventHandler
 	public void onBedJoin(PlayerBedEnterEvent event) {
-		if(!event.getPlayer().isSleepingIgnored()){
-			worldTimeSkip.get(event.getPlayer().getWorld().getUID()).incS();
-			worldTimeSkip.get(event.getPlayer().getWorld().getUID()).addToSet(event.getPlayer().getUniqueId());
+		if(!event.getPlayer().isSleepingIgnored() && !event.isCancelled()){
+			World world = event.getPlayer().getWorld();
+			int numSleeping = 0;
+			for(Player player : world.getPlayers()) {
+				if(player.isSleeping()) {
+					numSleeping++;
+				}
+			}
+			
+			worldTimeSkip.get(world.getUID()).setSleeping(numSleeping);
+			worldTimeSkip.get(world.getUID()).addToSet(event.getPlayer().getUniqueId());
+			worldTimeSkip.get(world.getUID()).recalculate();
 		}
 	}
 }

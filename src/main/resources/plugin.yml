@@ -17,4 +17,9 @@ commands:
     usage: /removeworld <WorldName>
     permission: SleepMultiplier.removeworld
     permission-message: You don't have the SleepMultiplier.removeworld permission.
+  ResetWorld:
+    description: Recalculates sleep for world
+    usage: /ResetWorld <WorldName>
+    permission: SleepMultiplier.ResetWorld
+    permission-message: You don't have the SleepMultiplier.ResetWorld permission.
   

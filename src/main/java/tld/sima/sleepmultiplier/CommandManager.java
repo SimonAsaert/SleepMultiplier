@@ -16,6 +16,7 @@ public class CommandManager implements CommandExecutor{
 
 	String cmd1 = "AddWorld";
 	String cmd2 = "RemoveWorld";
+	String cmd3 = "ResetWorld";
 	
 	public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
 		if (cmd.getName().equalsIgnoreCase(cmd1)) {
@@ -92,8 +93,65 @@ public class CommandManager implements CommandExecutor{
 				sender.sendMessage("Removes world that is effected by sleep multiplier");
 				return false;
 			}
+		}else if (cmd.getName().equalsIgnoreCase(cmd3)) {
+			if (sender instanceof Player) {
+				Player player = (Player) sender;
+				if (args.length == 0) {
+					World world = player.getWorld();
+					if(plugin.getWorlds().contains(world.getUID())) {
+						recalculate(world);
+						player.sendMessage(ChatColor.GREEN + "Recalculated time.");
+						return true;
+					}else {
+						player.sendMessage(ChatColor.RED + "World is not registered with this plugin. Use " + ChatColor.WHITE + "/" + cmd1 + ChatColor.RED + " to add world to list");
+						return true;
+					}
+				}else {
+					World world = Bukkit.getWorld(args[0]);
+					if (world == null) {
+						player.sendMessage(ChatColor.RED + "World not found!");
+						return true;
+					}else if (plugin.getWorlds().contains(world.getUID())) {
+						recalculate(world);
+						player.sendMessage(ChatColor.GREEN + "Recalculated time.");
+						return true;
+					}else {
+						player.sendMessage(ChatColor.RED + "World is not registered with this plugin. Use " + ChatColor.WHITE + "/" + cmd1 + ChatColor.RED + " to add world to list");
+						return true;
+					}
+				}
+			}else {
+				if(args.length == 0) {
+					plugin.getServer().getConsoleSender().sendMessage(ChatColor.RED + "You must be a player to use this command without a referred world!");
+					return true;
+				}else {
+					World world = Bukkit.getWorld(args[0]);
+					if (world == null) {
+						plugin.getServer().getConsoleSender().sendMessage(ChatColor.RED + "World not found!");
+						return true;
+					}else if (plugin.getWorlds().contains(world.getUID())) {
+						recalculate(world);
+						plugin.getServer().getConsoleSender().sendMessage(ChatColor.GREEN + "Recalculated time.");
+						return true;
+					}else {
+						plugin.getServer().getConsoleSender().sendMessage(ChatColor.RED + "World is not registered with this plugin. Use " + ChatColor.WHITE + "/" + cmd1 + ChatColor.RED + " to add world to list");
+						return true;
+					}
+				}
+			}
 		}
 		return false;
 	}
-
+	
+	private void recalculate(World world) {
+		int numSleeping = 0;
+		for(Player player : world.getPlayers()) {
+			if(player.isSleeping()) {
+				numSleeping++;
+			}
+		}
+		
+		plugin.worldTimeSkip.get(world.getUID()).setSleeping(numSleeping);
+		plugin.worldTimeSkip.get(world.getUID()).recalculate();
+	}
 }
