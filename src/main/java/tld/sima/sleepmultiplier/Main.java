@@ -55,16 +55,12 @@ public class Main extends JavaPlugin implements Listener{
 				}
 			}
 		};
-		run1.runTaskTimerAsynchronously(this, 20, 1);
+		run1.runTaskTimer(this, 20, 1);
 
 		BukkitRunnable run2 = new BukkitRunnable() {
 			public void run() {
 				for (UUID worlduuid : worldTimeSkip.keySet()) {
 					World world = Bukkit.getWorld(worlduuid);
-					long time = world.getTime();
-					if(time < 4500 || time > 20000) {
-						continue;
-					}
 
 					Set<UUID> sleepers = worldTimeSkip.get(world.getUID()).getSet();
 					if (!sleepers.isEmpty()) {
@@ -84,7 +80,7 @@ public class Main extends JavaPlugin implements Listener{
 			}
 		};
 
-		run2.runTaskTimerAsynchronously(this, 20, 2);
+		run2.runTaskTimerAsynchronously(this, 20, 4);
 
 		getServer().getPluginManager().registerEvents(this, this);	
 		Bukkit.getServer().getConsoleSender().sendMessage(ChatColor.AQUA + "Sleep Multipler enabled");
