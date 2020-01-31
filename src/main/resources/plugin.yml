@@ -22,4 +22,9 @@ commands:
     usage: /ResetWorld <WorldName>
     permission: SleepMultiplier.ResetWorld
     permission-message: You don't have the SleepMultiplier.ResetWorld permission.
+  WorldStats:
+    description: Recalculates sleep for world
+    usage: /WorldStats <WorldName>
+    permission: SleepMultiplier.WorldStats
+    permission-message: You don't have the SleepMultiplier.WorldStats permission.
   

@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 import org.bukkit.Bukkit;
@@ -75,12 +76,12 @@ public class SettingsManager {
 		return uuids;
 	}
 	
-	public void saveAll(List<UUID> uuids) {
+	public void saveAll(Set<UUID> uuids) {
 		saveWorlds(uuids);
 		savecfg();
 	}
 	
-	private void saveWorlds(List<UUID> uuids) {
+	private void saveWorlds(Set<UUID> uuids) {
 		ArrayList<String> list = new ArrayList<String>();
 		for (UUID uuid : uuids) {
 			list.add(uuid.toString());

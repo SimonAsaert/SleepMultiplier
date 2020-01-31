@@ -8,49 +8,49 @@ import net.md_5.bungee.api.ChatColor;
 
 public class WorldData {
 	private int numPlayers;
-	private int numSleeping;
+//	private int numSleeping;
 	private double multiplier;
 	private double multiplierMax;
-	private Set<UUID> players;
+	private Set<UUID> sleepers;
 	private String subtitle1;
 	private String subtitle2;
 	
 	public WorldData(int P, int S, Set<UUID> players, double multiplierMax) {
-		this.players = players;
+		this.sleepers = players;
 		numPlayers = P;
-		numSleeping = S;
+//		numSleeping = S;
 		this.multiplierMax = multiplierMax;
 		recalculate();
 	}
 	
 	public WorldData(int P, int S) {
-		players = new HashSet<UUID>();
+		sleepers = new HashSet<UUID>();
 		numPlayers = P;
-		numSleeping = S;
+//		numSleeping = S;
 		recalculate();
 	}
 	
 	public WorldData() {
-		players = new HashSet<UUID>();
+		sleepers = new HashSet<UUID>();
 		numPlayers = 0;
-		numSleeping = 0;
+//		numSleeping = 0;
 		multiplier = 0;
 	}
 	
 	public void addToSet(UUID uuid) {
-		players.add(uuid);
+		sleepers.add(uuid);
 	}
 	
 	public void removeFromSet(UUID uuid) {
-		players.remove(uuid);
+		sleepers.remove(uuid);
 	}
 	
 	public Set<UUID> getSet(){
-		return players;
+		return sleepers;
 	}
 	
 	public int getSleepers() {
-		return numSleeping;
+		return sleepers.size();
 	}
 	
 	public int getPlayers() {
@@ -66,12 +66,12 @@ public class WorldData {
 	}
 	
 	public void recalculate() {
-		if (numPlayers == 0) {
+		if (numPlayers == 0 || sleepers.size() == 0) {
 			multiplier = 0;
 		}else {
-			multiplier = multiplierMax * ((double)numSleeping/(double)numPlayers);
+			multiplier = multiplierMax * ((double)sleepers.size()/(double)numPlayers);
 		}
-		subtitle1 = ChatColor.AQUA + "" + numSleeping + "/" + numPlayers;
+		subtitle1 = ChatColor.AQUA + "" + sleepers.size() + "/" + numPlayers;
 		subtitle2 = ChatColor.GREEN + "(" + multiplier + "x speed)";
 	}
 	
@@ -85,23 +85,27 @@ public class WorldData {
 		recalculate();
 	}
 	
-	public void incS() {
-		numSleeping++;
-		recalculate();
+	public void setSet(Set<UUID> sleepers) {
+		this.sleepers = sleepers;
 	}
 	
-	public void decS() {
-		numSleeping--;
-		recalculate();
-	}
+//	public void incS() {
+//		numSleeping++;
+//		recalculate();
+//	}
+//	
+//	public void decS() {
+//		numSleeping--;
+//		recalculate();
+//	}
 	
 	public void setPlayers(int num) {
 		numPlayers = num;
 	}
 	
-	public void setSleeping(int num) {
-		numSleeping = num;
-	}
+//	public void setSleeping(int num) {
+//		numSleeping = num;
+//	}
 	
 	public double getMP() {
 		return multiplier;
