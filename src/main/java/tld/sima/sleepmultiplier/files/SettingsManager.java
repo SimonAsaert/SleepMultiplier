@@ -1,4 +1,4 @@
-package tld.sima.sleepmultiplier;
+package tld.sima.sleepmultiplier.files;
 
 import java.io.File;
 import java.io.IOException;
@@ -12,6 +12,8 @@ import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
+
+import tld.sima.sleepmultiplier.Main;
 
 public class SettingsManager {
 	private Main plugin = Main.getPlugin(Main.class);

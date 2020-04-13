@@ -1,6 +1,5 @@
-package tld.sima.sleepmultiplier;
+package tld.sima.sleepmultiplier.commands;
 
-import java.util.HashSet;
 import java.util.UUID;
 
 import org.bukkit.Bukkit;
@@ -11,56 +10,50 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
 import net.md_5.bungee.api.ChatColor;
+import tld.sima.sleepmultiplier.Main;
+import tld.sima.sleepmultiplier.utils.WorldData;
 
 public class CommandManager implements CommandExecutor{
 	Main plugin = Main.getPlugin(Main.class);
 
-	String cmd1 = "AddWorld";
-	String cmd2 = "RemoveWorld";
-	String cmd3 = "ResetWorld";
-	String cmd4 = "WorldStats";
+	public String cmd1 = "AddWorld";
+	public String cmd2 = "RemoveWorld";
+	public String cmd3 = "ResetWorld";
+	public String cmd4 = "WorldStats";
 	
 	public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
+		// /addworld
 		if (cmd.getName().equalsIgnoreCase(cmd1)) {
 			if (args.length == 0) {
 				if (sender instanceof Player) {
 					Player player = (Player) sender;
 					UUID worldUUID = player.getWorld().getUID();
 					if(plugin.addWorld(worldUUID)) {
-						player.sendMessage(ChatColor.GOLD + "Added world " + ChatColor.WHITE + player.getWorld().getName());
+						sender.sendMessage(ChatColor.GOLD + "Added world " + ChatColor.WHITE + player.getWorld().getName());
 					}else {
-						player.sendMessage(ChatColor.RED + "World already loaded!");
+						sender.sendMessage(ChatColor.RED + "World already loaded!");
 					}
 					return true;
 				}else {
-					Bukkit.getServer().getConsoleSender().sendMessage("Adds world that is effected by sleep multiplier");
+					sender.sendMessage("Adds world that is effected by sleep multiplier");
 					return false;
 				}
 			}else if (args.length == 1) {
 				String name = args[0];
 				World world = Bukkit.getWorld(name);
 				if (world == null) {
-					if(sender instanceof Player) {
-						Player player = (Player) sender;
-						player.sendMessage(ChatColor.RED + "Unable to find world with that name!");
-					}else {
-						Bukkit.getServer().getConsoleSender().sendMessage(ChatColor.RED + "unable to find world with that name!");
-					}
+					sender.sendMessage(ChatColor.RED + "Unable to find world with that name!");
 					return false;
 				}
 				UUID worldUUID = world.getUID();
-				plugin.getWorlds().add(worldUUID);
-				if(sender instanceof Player) {
-					Player player = (Player) sender;
-					player.sendMessage(ChatColor.GOLD + "Added world " + ChatColor.WHITE + world.getName());
-				}else {
-					Bukkit.getServer().getConsoleSender().sendMessage(ChatColor.GOLD + "Added world " + ChatColor.WHITE + world.getName());
-				}
+				plugin.addWorld(worldUUID);
+				sender.sendMessage(ChatColor.GOLD + "Added world " + ChatColor.WHITE + world.getName());
 				return true;
 			}else {
 				sender.sendMessage("Adds world that is effected by sleep multiplier");
 				return false;
 			}
+		// /remove world
 		}else if (cmd.getName().equalsIgnoreCase(cmd2)) {
 			if (args.length == 0) {
 				if (sender instanceof Player) {
@@ -77,34 +70,25 @@ public class CommandManager implements CommandExecutor{
 				String name = args[0];
 				World world = Bukkit.getWorld(name);
 				if (world == null) {
-					if(sender instanceof Player) {
-						Player player = (Player) sender;
-						player.sendMessage(ChatColor.RED + "Unable to find world with that name!");
-					}else {
-						Bukkit.getServer().getConsoleSender().sendMessage(ChatColor.RED + "unable to find world with that name!");
-					}
+					sender.sendMessage(ChatColor.RED + "Unable to find world with that name!");
 					return false;
 				}
 				UUID worldUUID = world.getUID();
 				plugin.getWorlds().remove(worldUUID);
-				if(sender instanceof Player) {
-					Player player = (Player) sender;
-					player.sendMessage(ChatColor.GOLD + "Removed world " + ChatColor.WHITE + world.getName());
-				}else {
-					Bukkit.getServer().getConsoleSender().sendMessage(ChatColor.GOLD + "Removed world " + ChatColor.WHITE + world.getName());
-				}
+				sender.sendMessage(ChatColor.GOLD + "Removed world " + ChatColor.WHITE + world.getName());
 				return true;
 			}else {
 				sender.sendMessage("Removes world that is effected by sleep multiplier");
 				return false;
 			}
+		// /resetworld
 		}else if (cmd.getName().equalsIgnoreCase(cmd3)) {
-			if (sender instanceof Player) {
-				Player player = (Player) sender;
-				if (args.length == 0) {
+			if(args.length == 0) {
+				if(sender instanceof Player) {
+					Player player = (Player) sender;
 					World world = player.getWorld();
 					if(plugin.getWorlds().contains(world.getUID())) {
-						recalculate(world);
+						plugin.getWorldData(world.getUID()).fullRecalculate(world.getUID());
 						player.sendMessage(ChatColor.GREEN + "Recalculated time.");
 						return true;
 					}else {
@@ -112,38 +96,24 @@ public class CommandManager implements CommandExecutor{
 						return true;
 					}
 				}else {
-					World world = Bukkit.getWorld(args[0]);
-					if (world == null) {
-						player.sendMessage(ChatColor.RED + "World not found!");
-						return true;
-					}else if (plugin.getWorlds().contains(world.getUID())) {
-						recalculate(world);
-						player.sendMessage(ChatColor.GREEN + "Recalculated time.");
-						return true;
-					}else {
-						player.sendMessage(ChatColor.RED + "World is not registered with this plugin. Use " + ChatColor.WHITE + "/" + cmd1 + ChatColor.RED + " to add world to list");
-						return true;
-					}
+					sender.sendMessage(ChatColor.RED + "You must be a player to use this command without a referred world!");
+					return true;
 				}
-			}else {
-				if(args.length == 0) {
-					plugin.getServer().getConsoleSender().sendMessage(ChatColor.RED + "You must be a player to use this command without a referred world!");
+			}else if(args.length == 1) {
+				World world = Bukkit.getWorld(args[0]);
+				if (world == null) {
+					sender.sendMessage(ChatColor.RED + "World not found!");
+					return true;
+				}else if (plugin.getWorlds().contains(world.getUID())) {
+					plugin.getWorldData(world.getUID()).fullRecalculate(world.getUID());
+					sender.sendMessage(ChatColor.GREEN + "Recalculated time.");
 					return true;
 				}else {
-					World world = Bukkit.getWorld(args[0]);
-					if (world == null) {
-						plugin.getServer().getConsoleSender().sendMessage(ChatColor.RED + "World not found!");
-						return true;
-					}else if (plugin.getWorlds().contains(world.getUID())) {
-						recalculate(world);
-						plugin.getServer().getConsoleSender().sendMessage(ChatColor.GREEN + "Recalculated time.");
-						return true;
-					}else {
-						plugin.getServer().getConsoleSender().sendMessage(ChatColor.RED + "World is not registered with this plugin. Use " + ChatColor.WHITE + "/" + cmd1 + ChatColor.RED + " to add world to list");
-						return true;
-					}
+					sender.sendMessage(ChatColor.RED + "World is not registered with this plugin. Use " + ChatColor.WHITE + "/" + cmd1 + ChatColor.RED + " to add world to list");
+					return true;
 				}
 			}
+		// /worldstats
 		}else if (cmd.getName().equalsIgnoreCase(cmd4)) {
 			UUID worldUUID;
 			if(args.length > 0) {
@@ -177,22 +147,5 @@ public class CommandManager implements CommandExecutor{
 			sender.sendMessage(names.toString());
 		}
 		return true;
-	}
-	
-	private void recalculate(World world) {
-		HashSet<UUID> sleepers = new HashSet<UUID>();
-		int numPlayers = 0;
-		for(Player player : world.getPlayers()) {
-			if(player.isSleeping() && !player.isSleepingIgnored()) {
-				numPlayers++;
-				sleepers.add(player.getUniqueId());
-			}else if (!player.isSleepingIgnored()) {
-				numPlayers++;
-			}
-		}
-
-		plugin.worldTimeSkip.get(world.getUID()).setSet(sleepers);
-		plugin.worldTimeSkip.get(world.getUID()).setPlayers(numPlayers);
-		plugin.worldTimeSkip.get(world.getUID()).recalculate();
 	}
 }

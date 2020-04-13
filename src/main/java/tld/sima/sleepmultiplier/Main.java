@@ -11,20 +11,20 @@ import org.bukkit.ChatColor;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
-import org.bukkit.event.Listener;
-import org.bukkit.event.player.PlayerBedEnterEvent;
-import org.bukkit.event.player.PlayerBedLeaveEvent;
-import org.bukkit.event.player.PlayerChangedWorldEvent;
-import org.bukkit.event.player.PlayerLoginEvent;
-import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.world.WorldLoadEvent;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitRunnable;
 
-public class Main extends JavaPlugin implements Listener{
+import tld.sima.sleepmultiplier.commands.CommandManager;
+import tld.sima.sleepmultiplier.events.EventsManager;
+import tld.sima.sleepmultiplier.files.SettingsManager;
+import tld.sima.sleepmultiplier.utils.Utils;
+import tld.sima.sleepmultiplier.utils.WorldData;
+
+public class Main extends JavaPlugin {
 	public double multiplierMax;
+	private HashSet<UUID> currentWorldList;
 	public HashMap<UUID, WorldData> worldTimeSkip;
-	private SettingsManager smgr;
 
 	@Override
 	public void onEnable() {
@@ -36,13 +36,13 @@ public class Main extends JavaPlugin implements Listener{
 
 		worldTimeSkip = new HashMap<UUID, WorldData>();
 
-		smgr = new SettingsManager();
+		SettingsManager smgr = new SettingsManager();
 		smgr.setup();
-		Set<UUID> worlds = smgr.getWorldList();
+		currentWorldList = smgr.getWorldList();
 		multiplierMax = smgr.getMaxMultiplier();
 
 		for (World world : Bukkit.getWorlds()) {
-			if(worlds.contains(world.getUID())){
+			if(currentWorldList.contains(world.getUID())){
 				addWorld(world.getUID());
 			}
 		}
@@ -73,7 +73,7 @@ public class Main extends JavaPlugin implements Listener{
 						String title = hours + ":" + minutes;
 
 						for (UUID uuid : sleepers) {
-							sendTitle(uuid, title, worldTimeSkip.get(world.getUID()).getSubtitle1(), worldTimeSkip.get(world.getUID()).getSubtitle2());
+							Utils.sendTitle(uuid, title, worldTimeSkip.get(world.getUID()).getSubtitle1(), worldTimeSkip.get(world.getUID()).getSubtitle2());
 						}
 					}
 				}
@@ -81,27 +81,23 @@ public class Main extends JavaPlugin implements Listener{
 		};
 
 		run2.runTaskTimerAsynchronously(this, 20, 4);
-
-		getServer().getPluginManager().registerEvents(this, this);	
+		
+		getServer().getPluginManager().registerEvents(new EventsManager(), this);	
 		Bukkit.getServer().getConsoleSender().sendMessage(ChatColor.AQUA + "Sleep Multipler enabled");
 	}
 
-	// Send display packet to player 
-	private void sendTitle(UUID uuid, String title, String subtitle1, String subtitle2) {
-		Player player = Bukkit.getPlayer(uuid);
-		player.sendTitle(ChatColor.DARK_AQUA + title, ChatColor.AQUA + subtitle1 + ChatColor.GREEN + " " + subtitle2, 1, 4, 1);
-	}
-	
 	// Events
 	@Override
 	public void onDisable() {
+		SettingsManager smgr = new SettingsManager();
+		smgr.setup();
 		smgr.saveAll(worldTimeSkip.keySet());
 		Bukkit.getServer().getConsoleSender().sendMessage(ChatColor.RED + "Sleep Multipler disabled");
 	}
 
 	@EventHandler
 	public void onLoad(WorldLoadEvent event) {
-		if(smgr.getWorldList().contains(event.getWorld().getUID())) {
+		if(currentWorldList.contains(event.getWorld().getUID())) {
 			addWorld(event.getWorld().getUID());
 		}
 	}
@@ -128,65 +124,12 @@ public class Main extends JavaPlugin implements Listener{
 		worldTimeSkip.put(worldUUID, wd);
 		return true;
 	}
+	
+	public WorldData getWorldData(UUID uuid) {
+		return worldTimeSkip.get(uuid);
+	}
 
 	public Set<UUID> getWorlds(){
 		return worldTimeSkip.keySet();
-	}
-	
-	@EventHandler
-	public void onLogin(PlayerLoginEvent event) {
-		Player player = event.getPlayer();
-		final UUID worldUID = player.getWorld().getUID();
-		if(worldTimeSkip.containsKey(worldUID) && !event.getPlayer().isSleepingIgnored()){
-			BukkitRunnable run = new BukkitRunnable() {
-				public void run() {
-					worldTimeSkip.get(worldUID).incP();
-				}
-			};
-			run.runTaskLaterAsynchronously(this, 5);
-		}
-	}
-	
-	@EventHandler
-	public void onLogout(PlayerQuitEvent event) {
-		Player player = event.getPlayer();
-		final UUID worldUID = player.getWorld().getUID();
-		if(worldTimeSkip.containsKey(worldUID) && !event.getPlayer().isSleepingIgnored()){
-			worldTimeSkip.get(event.getPlayer().getWorld().getUID()).decP();
-		}
-	}
-	
-	@EventHandler
-	public void onWorldChange(PlayerChangedWorldEvent event) {
-		Player player = event.getPlayer();
-		final UUID worldUID = player.getWorld().getUID();
-		if(worldTimeSkip.containsKey(worldUID) && !event.getPlayer().isSleepingIgnored()){
-			worldTimeSkip.get(event.getFrom().getUID()).decP();
-			worldTimeSkip.get(event.getPlayer().getWorld().getUID()).incP();
-		}
-	}
-	
-	@EventHandler
-	public void onBedLeave(PlayerBedLeaveEvent event) {
-		Player player = event.getPlayer();
-		final UUID worldUID = player.getWorld().getUID();
-		if(worldTimeSkip.containsKey(worldUID) && !event.getPlayer().isSleepingIgnored()){
-//			worldTimeSkip.get(event.getPlayer().getWorld().getUID()).decS();
-			worldTimeSkip.get(event.getPlayer().getWorld().getUID()).removeFromSet(event.getPlayer().getUniqueId());
-			worldTimeSkip.get(event.getPlayer().getWorld().getUID()).recalculate();
-		}
-	}
-	
-	@EventHandler
-	public void onBedJoin(PlayerBedEnterEvent event) {
-		Player player = event.getPlayer();
-		final UUID worldUID = player.getWorld().getUID();
-		if(worldTimeSkip.containsKey(worldUID) && !event.getPlayer().isSleepingIgnored() && !event.isCancelled()){
-			World world = event.getPlayer().getWorld();
-			
-//			worldTimeSkip.get(world.getUID()).setSleeping(numSleeping);
-			worldTimeSkip.get(world.getUID()).addToSet(event.getPlayer().getUniqueId());
-			worldTimeSkip.get(world.getUID()).recalculate();
-		}
 	}
 }

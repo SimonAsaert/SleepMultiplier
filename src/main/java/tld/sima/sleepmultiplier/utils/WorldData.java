@@ -1,14 +1,17 @@
-package tld.sima.sleepmultiplier;
+package tld.sima.sleepmultiplier.utils;
 
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
 
+import org.bukkit.Bukkit;
+import org.bukkit.World;
+import org.bukkit.entity.Player;
+
 import net.md_5.bungee.api.ChatColor;
 
 public class WorldData {
 	private int numPlayers;
-//	private int numSleeping;
 	private double multiplier;
 	private double multiplierMax;
 	private Set<UUID> sleepers;
@@ -18,7 +21,6 @@ public class WorldData {
 	public WorldData(int P, int S, Set<UUID> players, double multiplierMax) {
 		this.sleepers = players;
 		numPlayers = P;
-//		numSleeping = S;
 		this.multiplierMax = multiplierMax;
 		recalculate();
 	}
@@ -26,14 +28,12 @@ public class WorldData {
 	public WorldData(int P, int S) {
 		sleepers = new HashSet<UUID>();
 		numPlayers = P;
-//		numSleeping = S;
 		recalculate();
 	}
 	
 	public WorldData() {
 		sleepers = new HashSet<UUID>();
 		numPlayers = 0;
-//		numSleeping = 0;
 		multiplier = 0;
 	}
 	
@@ -89,25 +89,27 @@ public class WorldData {
 		this.sleepers = sleepers;
 	}
 	
-//	public void incS() {
-//		numSleeping++;
-//		recalculate();
-//	}
-//	
-//	public void decS() {
-//		numSleeping--;
-//		recalculate();
-//	}
-	
 	public void setPlayers(int num) {
 		numPlayers = num;
 	}
 	
-//	public void setSleeping(int num) {
-//		numSleeping = num;
-//	}
-	
 	public double getMP() {
 		return multiplier;
+	}
+	
+	public void fullRecalculate(UUID worldUUID) {
+		World world = Bukkit.getWorld(worldUUID);
+		sleepers.clear();
+		numPlayers = 0;
+		for(Player p : world.getPlayers()) {
+			if(p.isSleepingIgnored()) {
+				continue;
+			}
+			numPlayers++;
+			if(p.isSleeping()) {
+				sleepers.add(p.getUniqueId());
+			}
+		}
+		recalculate();
 	}
 }
