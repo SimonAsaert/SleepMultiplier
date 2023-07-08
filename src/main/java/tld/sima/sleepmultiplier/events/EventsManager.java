@@ -26,9 +26,9 @@ public class EventsManager implements Listener{
 		String command = event.getCommand();
 		String[] tokens = command.split("[ ]");
 		
-		if(tokens[0].equalsIgnoreCase("op") && tokens.length > 0) {
+		if(tokens.length > 0 && tokens[0].equalsIgnoreCase("op") ) {
 			parseCommand(tokens[1], true);
-		}else if (tokens[0].equalsIgnoreCase("deop") && tokens.length > 0) {
+		}else if (tokens.length > 0 && tokens[0].equalsIgnoreCase("deop")) {
 			parseCommand(tokens[1], false);
 		}
 	}
@@ -39,9 +39,9 @@ public class EventsManager implements Listener{
 			Player p = event.getPlayer();
 			String command = event.getMessage();
 			String[] tokens = command.split("[ ]");
-			if(tokens[0].equalsIgnoreCase("/op") && p.hasPermission("minecraft.command.op") && tokens.length > 0) {
+			if(tokens.length > 0 && tokens[0].equalsIgnoreCase("/op") && p.hasPermission("minecraft.command.op")) {
 				parseCommand(tokens[1], true);
-			}else if (tokens[0].equalsIgnoreCase("/deop") && p.hasPermission("minecraft.command.deop") && tokens.length > 0) {
+			}else if (tokens.length > 0 && tokens[0].equalsIgnoreCase("/deop") && p.hasPermission("minecraft.command.deop")) {
 				parseCommand(tokens[1], false);
 			}
 		}

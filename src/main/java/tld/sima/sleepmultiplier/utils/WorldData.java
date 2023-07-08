@@ -1,5 +1,6 @@
 package tld.sima.sleepmultiplier.utils;
 
+import java.text.DecimalFormat;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
@@ -11,6 +12,7 @@ import org.bukkit.entity.Player;
 import net.md_5.bungee.api.ChatColor;
 
 public class WorldData {
+	private static final DecimalFormat df = new DecimalFormat("0.00");
 	private int numPlayers;
 	private double multiplier;
 	private double multiplierMax;
@@ -23,18 +25,6 @@ public class WorldData {
 		numPlayers = P;
 		this.multiplierMax = multiplierMax;
 		recalculate();
-	}
-	
-	public WorldData(int P, int S) {
-		sleepers = new HashSet<UUID>();
-		numPlayers = P;
-		recalculate();
-	}
-	
-	public WorldData() {
-		sleepers = new HashSet<UUID>();
-		numPlayers = 0;
-		multiplier = 0;
 	}
 	
 	public void addToSet(UUID uuid) {
@@ -72,7 +62,7 @@ public class WorldData {
 			multiplier = multiplierMax * ((double)sleepers.size()/(double)numPlayers);
 		}
 		subtitle1 = ChatColor.AQUA + "" + sleepers.size() + "/" + numPlayers;
-		subtitle2 = ChatColor.GREEN + "(" + multiplier + "x speed)";
+		subtitle2 = ChatColor.GREEN + "(" +  df.format(multiplier) + "x speed)";
 	}
 	
 	public void incP() {

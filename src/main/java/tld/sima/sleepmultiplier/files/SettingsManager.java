@@ -16,7 +16,7 @@ import org.bukkit.configuration.file.YamlConfiguration;
 import tld.sima.sleepmultiplier.Main;
 
 public class SettingsManager {
-	private Main plugin = Main.getPlugin(Main.class);
+	private final Main plugin = Main.getPlugin(Main.class);
 	
 	private FileConfiguration storagecfg;
 	private File storagefile;
@@ -29,8 +29,7 @@ public class SettingsManager {
 
 		// Create main file
 		String FileLocation = plugin.getDataFolder().toString() + File.separator + "Storage" + ".yml";
-		File tmp = new File(FileLocation);
-		storagefile = tmp;
+		storagefile = new File(FileLocation);
 		// Check if file exists
 		if (!storagefile.exists()) {
 			try {
@@ -48,17 +47,15 @@ public class SettingsManager {
 		storagecfg.addDefault("Worlds.AffectedWorlds", new ArrayList<String>());
 		storagecfg.addDefault("Worlds.Settings.MultiplierMax", 20);
 		storagecfg.options().copyDefaults(true);
-		savecfg();
+		saveCfg();
 	}
 
-	private boolean savecfg() {
+	private void saveCfg() {
 		try {
 			storagecfg.save(storagefile);
 		} catch (IOException e) {
 			Bukkit.getServer().getConsoleSender().sendMessage(ChatColor.RED + "Unable to save storage file!" );
-			return false;
 		}
-		return true;
 	}
 	
 	public int getMaxMultiplier() {
@@ -80,7 +77,7 @@ public class SettingsManager {
 	
 	public void saveAll(Set<UUID> uuids) {
 		saveWorlds(uuids);
-		savecfg();
+		saveCfg();
 	}
 	
 	private void saveWorlds(Set<UUID> uuids) {

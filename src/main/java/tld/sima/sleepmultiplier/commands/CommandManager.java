@@ -118,7 +118,7 @@ public class CommandManager implements CommandExecutor{
 			UUID worldUUID;
 			if(args.length > 0) {
 				World world = Bukkit.getWorld(args[0]);
-				if(world.equals(null)) {
+				if(world == null) {
 					sender.sendMessage(ChatColor.RED + "Unable to find World!");
 					return true;
 				}

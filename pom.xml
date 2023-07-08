@@ -3,7 +3,11 @@
   <groupId>tld.sima</groupId>
   <artifactId>sleepMultiplier</artifactId>
   <version>0.0.1-SNAPSHOT</version>
-  
+  <properties>
+    <maven.compiler.source>20</maven.compiler.source>
+    <maven.compiler.target>20</maven.compiler.target>
+  </properties>
+
   <build>
     <resources>
       <resource>
@@ -26,7 +30,7 @@
     <dependency>
       <groupId>org.spigotmc</groupId>
         <artifactId>spigot-api</artifactId>
-        <version>1.15.2-R0.1-SNAPSHOT</version>
+        <version>1.20.1-R0.1-SNAPSHOT</version>
         <scope>provided</scope>
     </dependency>
     
